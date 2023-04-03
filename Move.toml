@@ -5,7 +5,9 @@ version = "2.0.1"
 [addresses]
 StarcoinFramework = "0x1"
 ZionBridge = "0xf8ea2d94b8a7d83ace33bb56731268e0"
+PolyBridge = "0xe52552637c5897a2d499fbf08216f73e"
 
 [dependencies]
 # v1.12.9
 StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "c101e26a45401671ae04b5571387661f0fc3656f" }
+Poly-STC-Assets = { git = "https://github.com/Elements-Studio/poly-stc-assets", rev = "e2fc2eb61e939d77381e41a3ef9cb6c23b9c55a6" }

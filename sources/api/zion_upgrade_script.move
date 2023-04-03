@@ -8,9 +8,32 @@ module ZionBridge::zion_upgrade_script {
     use ZionBridge::zion_cross_chain_manager;
     use ZionBridge::zion_lock_proxy;
 
-    public entry fun genesis_init(admin: signer, raw_header: vector<u8>, starcoin_poly_id: u64) {
+    public fun bindAssets(admin: &signer, zion_id: u64) {
+        zion_lock_proxy::bindAsset<STC>(
+            admin,
+            zion_id,
+            BCS::to_bytes(&TypeInfo::type_of<Token::Token<STC::STC>>()),
+            SafeMath::log10(Token::scaling_factor<STC>())
+        );
+
+        zion_lock_proxy::bindAsset<PolyBridge::XUSDT::XUSDT>(
+            admin,
+            zion_id,
+            BCS::to_bytes(&TypeInfo::type_of<Token::Token<PolyBridge::XUSDT::XUSDT>>()),
+            SafeMath::log10(Token::scaling_factor<PolyBridge::XUSDT::XUSDT>())
+        );
+
+        zion_lock_proxy::bindAsset<PolyBridge::XETH::XETH>(
+            admin,
+            zion_id,
+            BCS::to_bytes(&TypeInfo::type_of<Token::Token<PolyBridge::XETH::XETH>>()),
+            SafeMath::log10(Token::scaling_factor<PolyBridge::XETH::XETH>())
+        );
+    }
+
+    public entry fun genesis_init(admin: signer, raw_header: vector<u8>, starcoin_zion_id: u64) {
         // Treasury
-        zion_cross_chain_manager::init(&admin, raw_header, starcoin_poly_id);
+        zion_cross_chain_manager::init(&admin, raw_header, starcoin_zion_id);
 
         let license = zion_cross_chain_manager::issueLicense(&admin, @ZionBridge, b"zion_lock_proxy");
         let license_id = zion_cross_chain_manager::getLicenseId(&license);
@@ -19,16 +42,7 @@ module ZionBridge::zion_upgrade_script {
         zion_lock_proxy::receiveLicense(license);
 
         // Bind STC
-        zion_lock_proxy::bindProxy(&admin, starcoin_poly_id, license_id);
-        zion_lock_proxy::bindAsset<STC>(
-            &admin,
-            starcoin_poly_id,
-            BCS::to_bytes(&TypeInfo::type_of<Token::Token<STC::STC>>()),
-            SafeMath::log10(Token::scaling_factor<STC>())
-        );
-
-        // TODO(Bob Ong): Bind XUSDT asset
-
-        // TODO(Bob Ong): Bind XETH asset
+        zion_lock_proxy::bindProxy(&admin, starcoin_zion_id, license_id);
+        bindAssets(&admin, starcoin_zion_id);
     }
 }
