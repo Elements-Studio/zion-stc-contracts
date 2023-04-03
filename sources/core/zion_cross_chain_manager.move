@@ -1,5 +1,5 @@
-module Bridge::zion_cross_chain_manager {
-    use Bridge::zion_cross_chain_utils;
+module ZionBridge::zion_cross_chain_manager {
+    use ZionBridge::zion_cross_chain_utils;
 
     use StarcoinFramework::ACL;
     use StarcoinFramework::BCS;
@@ -41,7 +41,7 @@ module Bridge::zion_cross_chain_manager {
     const CA_ROLE: u64 = 3;
 
     public fun hasRole(role: u64, account: address): bool acquires ACLStore {
-        let acl_store_ref = borrow_global<ACLStore>(@Bridge);
+        let acl_store_ref = borrow_global<ACLStore>(@ZionBridge);
         if (Table::contains(&acl_store_ref.role_acls, copy role)) {
             let role_acl = Table::borrow(&acl_store_ref.role_acls, copy role);
             return ACL::contains(role_acl, account)
@@ -53,7 +53,7 @@ module Bridge::zion_cross_chain_manager {
     public /*entry*/ fun grantRole(admin: &signer, role: u64, account: address) acquires ACLStore {
         assert!(hasRole(ADMIN_ROLE, Signer::address_of(admin)), ENOT_ADMIN);
         assert!(!hasRole(role, account), EALREADY_HAS_ROLE);
-        let acl_store_ref = borrow_global_mut<ACLStore>(@Bridge);
+        let acl_store_ref = borrow_global_mut<ACLStore>(@ZionBridge);
         if (Table::contains(&acl_store_ref.role_acls, copy role)) {
             let role_acl = Table::borrow_mut(&mut acl_store_ref.role_acls, copy role);
             ACL::add(role_acl, account);
@@ -67,7 +67,7 @@ module Bridge::zion_cross_chain_manager {
     public /*entry*/ fun revokeRole(admin: &signer, role: u64, account: address) acquires ACLStore {
         assert!(hasRole(ADMIN_ROLE, Signer::address_of(admin)), ENOT_ADMIN);
         assert!(hasRole(role, account), ENOT_HAS_ROLE);
-        let acl_store_ref = borrow_global_mut<ACLStore>(@Bridge);
+        let acl_store_ref = borrow_global_mut<ACLStore>(@ZionBridge);
         let role_acl = Table::borrow_mut(&mut acl_store_ref.role_acls, copy role);
         ACL::remove(role_acl, account);
     }
@@ -110,7 +110,7 @@ module Bridge::zion_cross_chain_manager {
     // black list
     // access level: 0b000000xy , x means blackListed as fromContract , y means blackListed as toContract
     public fun isBlackListedFrom(license_id: &vector<u8>): bool acquires ACLStore {
-        let acl_store_ref = borrow_global<ACLStore>(@Bridge);
+        let acl_store_ref = borrow_global<ACLStore>(@ZionBridge);
         if (Table::contains(&acl_store_ref.license_black_list, *license_id)) {
             let access_level = *Table::borrow(&acl_store_ref.license_black_list, *license_id);
             return (access_level & 0x02) != 0
@@ -120,7 +120,7 @@ module Bridge::zion_cross_chain_manager {
     }
 
     public fun isBlackListedTo(license_id: &vector<u8>): bool acquires ACLStore {
-        let acl_store_ref = borrow_global<ACLStore>(@Bridge);
+        let acl_store_ref = borrow_global<ACLStore>(@ZionBridge);
         if (Table::contains(&acl_store_ref.license_black_list, *license_id)) {
             let access_level = *Table::borrow(&acl_store_ref.license_black_list, *license_id);
             return (access_level & 0x01) != 0
@@ -131,7 +131,7 @@ module Bridge::zion_cross_chain_manager {
 
     public /*entry*/ fun setBlackList(ca: &signer, license_id: vector<u8>, access_level: u8) acquires ACLStore {
         assert!(hasRole(CA_ROLE, Signer::address_of(ca)), ENOT_CA_ROLE);
-        let acl_store_ref = borrow_global_mut<ACLStore>(@Bridge);
+        let acl_store_ref = borrow_global_mut<ACLStore>(@ZionBridge);
         let v_ref = Table::borrow_mut_with_default(
             &mut acl_store_ref.license_black_list,
             license_id,
@@ -190,47 +190,47 @@ module Bridge::zion_cross_chain_manager {
     }
 
     fun putPolyId(polyId: u64) acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         config_ref.polyId = polyId;
     }
 
     public fun getPolyId(): u64 acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return config_ref.polyId
     }
 
     fun putCurEpochStartHeight(height: u64) acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         config_ref.curEpochStartHeight = height;
     }
 
     public fun getCurEpochStartHeight(): u64 acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return config_ref.curEpochStartHeight
     }
 
     fun putCurEpochEndHeight(height: u64) acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         config_ref.curEpochEndHeight = height;
     }
 
     public fun getCurEpochEndHeight(): u64 acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return config_ref.curEpochEndHeight
     }
 
     fun putCurValidators(validators: &vector<vector<u8>>) acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         config_ref.curValidators = *validators;
     }
 
     public fun getCurValidators(): vector<vector<u8>> acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return *&config_ref.curValidators
     }
 
     fun markFromChainTxExist(fromChainId: u64, fromChainTx: &vector<u8>) acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         if (Table::contains(&config_ref.fromChainTxExist, copy fromChainId)) {
             Table::upsert(
                 Table::borrow_mut(&mut config_ref.fromChainTxExist, copy fromChainId),
@@ -250,7 +250,7 @@ module Bridge::zion_cross_chain_manager {
         fromChainId: u64,
         fromChainTx: &vector<u8>
     ): bool acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         if (Table::contains(&config_ref.fromChainTxExist, copy fromChainId)) {
             if (Table::contains(Table::borrow(&config_ref.fromChainTxExist, copy fromChainId), *fromChainTx)) {
                 return *Table::borrow(Table::borrow(&config_ref.fromChainTxExist, copy fromChainId), *fromChainTx)
@@ -260,55 +260,55 @@ module Bridge::zion_cross_chain_manager {
     }
 
     public fun getStarcoinTxHashIndex(): u128 acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return config_ref.starcoinToPolyTxHashIndex
     }
 
     fun putStarcoinTxHash(hash: &vector<u8>) acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         let index = config_ref.starcoinToPolyTxHashIndex;
         Table::upsert(&mut config_ref.aptosToPolyTxHashMap, index, *hash);
         config_ref.starcoinToPolyTxHashIndex = index + 1;
     }
 
     public fun getAptosTxHash(aptosHashIndex: u128): vector<u8> acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return *Table::borrow(&config_ref.aptosToPolyTxHashMap, copy aptosHashIndex)
     }
 
 
     // pause/unpause
     public fun paused(): bool acquires CrossChainGlobalConfig {
-        let config_ref = borrow_global<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return config_ref.paused
     }
 
     public fun pause(account: &signer) acquires CrossChainGlobalConfig, ACLStore {
         assert!(hasRole(PAUSE_ROLE, Signer::address_of(account)), ENOT_PAUSE_ROLE);
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         config_ref.paused = true;
     }
 
     public fun unpause(account: &signer) acquires CrossChainGlobalConfig, ACLStore {
         assert!(hasRole(PAUSE_ROLE, Signer::address_of(account)), ENOT_PAUSE_ROLE);
-        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@Bridge);
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
         config_ref.paused = false;
     }
 
 
     // initialize
     public /*entry*/ fun init(account: &signer, raw_header: vector<u8>, polyId: u64) acquires EventStore {
-        assert!(Signer::address_of(account) == @Bridge, EINVALID_SIGNER);
-        assert!(!exists<CrossChainGlobalConfig>(@Bridge), EALREADY_INITIALIZED);
+        assert!(Signer::address_of(account) == @ZionBridge, EINVALID_SIGNER);
+        assert!(!exists<CrossChainGlobalConfig>(@ZionBridge), EALREADY_INITIALIZED);
 
         // init access control lists
         let acls = Table::new<u64, ACL::ACL>();
         let admin_acl = ACL::empty();
         let pause_acl = ACL::empty();
         let ca_acl = ACL::empty();
-        ACL::add(&mut admin_acl, @Bridge);
-        ACL::add(&mut pause_acl, @Bridge);
-        ACL::add(&mut ca_acl, @Bridge);
+        ACL::add(&mut admin_acl, @ZionBridge);
+        ACL::add(&mut pause_acl, @ZionBridge);
+        ACL::add(&mut ca_acl, @ZionBridge);
         Table::add(&mut acls, ADMIN_ROLE, admin_acl);
         Table::add(&mut acls, PAUSE_ROLE, pause_acl);
         Table::add(&mut acls, CA_ROLE, ca_acl);
@@ -342,7 +342,7 @@ module Bridge::zion_cross_chain_manager {
             verify_header_and_execute_tx_event: Event::new_event_handle<VerifyHeaderAndExecuteTxEvent>(account),
         });
 
-        let event_store = borrow_global_mut<EventStore>(@Bridge);
+        let event_store = borrow_global_mut<EventStore>(@ZionBridge);
         Event::emit_event(
             &mut event_store.init_genesis_block_event,
             InitGenesisBlockEvent {
@@ -385,7 +385,7 @@ module Bridge::zion_cross_chain_manager {
         putCurEpochStartHeight(height + 1);
         putCurEpochEndHeight(epoch_end_height);
 
-        let event_store = borrow_global_mut<EventStore>(@Bridge);
+        let event_store = borrow_global_mut<EventStore>(@ZionBridge);
         Event::emit_event(
             &mut event_store.change_epoch_event,
             ChangeEpochEvent {
@@ -418,7 +418,7 @@ module Bridge::zion_cross_chain_manager {
         Vector::reverse(&mut param_tx_hash);
 
         let cross_chain_id = Vector::empty<u8>();
-        Vector::append(&mut cross_chain_id, BCS::to_bytes(&@Bridge));
+        Vector::append(&mut cross_chain_id, BCS::to_bytes(&@ZionBridge));
         Vector::append(&mut cross_chain_id, b"::StarcoinCrossChainManager");
         Vector::append(&mut cross_chain_id, *&param_tx_hash);
 
@@ -438,7 +438,7 @@ module Bridge::zion_cross_chain_manager {
         putStarcoinTxHash(&Hash::keccak_256(*&raw_param));
 
         // emit event
-        let event_store = borrow_global_mut<EventStore>(@Bridge);
+        let event_store = borrow_global_mut<EventStore>(@ZionBridge);
         Event::emit_event(
             &mut event_store.cross_chain_event,
             CrossChainEvent {
@@ -545,7 +545,7 @@ module Bridge::zion_cross_chain_manager {
         assert!(!isBlackListedTo(&to_contract), EBLACKLISTED_TO);
 
         // emit event
-        let event_store = borrow_global_mut<EventStore>(@Bridge);
+        let event_store = borrow_global_mut<EventStore>(@ZionBridge);
         Event::emit_event(
             &mut event_store.verify_header_and_execute_tx_event,
             VerifyHeaderAndExecuteTxEvent {
@@ -565,10 +565,4 @@ module Bridge::zion_cross_chain_manager {
             args,
         }
     }
-
-    // fun getZionCrossChainManagerAddr(): vector<u8> {
-    //     let ret = Vector::empty<u8>();
-    //     Vector::append(&mut ret, CrossChainLibrary::address_to_hex_string(@Bridge));
-    //     ret
-    // }
 }

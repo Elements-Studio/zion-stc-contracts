@@ -1,6 +1,6 @@
-module Bridge::zion_cross_chain_manager_script {
+module ZionBridge::zion_cross_chain_manager_script {
 
-    use Bridge::zion_cross_chain_manager;
+    use ZionBridge::zion_cross_chain_manager;
 
     public entry fun grantRole(admin: signer, role: u64, account: address) {
         zion_cross_chain_manager::grantRole(&admin, role, account);

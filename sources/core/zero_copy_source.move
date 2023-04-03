@@ -1,7 +1,7 @@
-module Bridge::zero_copy_source {
+module ZionBridge::zero_copy_source {
 
     use StarcoinFramework::Vector;
-    use Bridge::zion_utils;
+    use ZionBridge::zion_utils;
 
     public fun next_bool(bs: &vector<u8>, offset: u64): (bool, u64) {
         let res = *Vector::borrow<u8>(bs, offset);

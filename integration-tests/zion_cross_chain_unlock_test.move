@@ -1,4 +1,4 @@
-//# init -n test --public-keys Bridge=0x8085e172ecf785692da465ba3339da46c4b43640c3f92a45db803690cc3c4a36
+//# init -n test --public-keys ZionBridge=0x8085e172ecf785692da465ba3339da46c4b43640c3f92a45db803690cc3c4a36
 
 //# faucet --addr Bridge --amount 10000000000
 
@@ -9,7 +9,7 @@
 
 //# run --signers Bridge
 script {
-    use Bridge::zion_cross_chain_utils;
+    use ZionBridge::zion_cross_chain_utils;
 
     fun test_check_header(_signer: signer) {
         // https://explorer.aptoslabs.com/txn/411144842/payload
@@ -22,9 +22,9 @@ script {
 
 //# run --signers Bridge
 script {
-    use Bridge::SafeMath;
-    use Bridge::zion_cross_chain_manager;
-    use Bridge::zion_lock_proxy;
+    use ZionBridge::SafeMath;
+    use ZionBridge::zion_cross_chain_manager;
+    use ZionBridge::zion_lock_proxy;
     use StarcoinFramework::BCS;
     use StarcoinFramework::STC::STC;
     use StarcoinFramework::Signer;
@@ -59,7 +59,7 @@ script {
 
 //# run --signers Bridge
 script {
-    use Bridge::zion_cross_chain_manager;
+    use ZionBridge::zion_cross_chain_manager;
 
     const ZION_SEAL_RLP_LEN: u64 = 67;
 
@@ -104,7 +104,7 @@ script {
 
 //# run --signers alice
 script {
-    use Bridge::zion_lock_proxy;
+    use ZionBridge::zion_lock_proxy;
     use StarcoinFramework::Account;
     use StarcoinFramework::BCS;
     use StarcoinFramework::STC::STC;
@@ -114,7 +114,7 @@ script {
         let to_chain_id = 318;
         let amount = 100 * Token::scaling_factor<STC>();
         let stc = Account::withdraw<STC>(&sender, amount);
-        let dst_addr = BCS::to_bytes<address>(&@Bridge);
+        let dst_addr = BCS::to_bytes<address>(&@ZionBridge);
         zion_lock_proxy::lock<STC>(&sender, stc, to_chain_id, &dst_addr);
         assert!(zion_lock_proxy::getBalance<STC>() == amount, 10001);
     }
@@ -123,7 +123,7 @@ script {
 
 //# run --signers Bridge
 script {
-    use Bridge::zion_lock_proxy;
+    use ZionBridge::zion_lock_proxy;
     use StarcoinFramework::STC::STC;
 
     fun bridge_unlock_to_bob(sender: signer) {

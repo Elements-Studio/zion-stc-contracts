@@ -1,6 +1,6 @@
-module Bridge::zion_cross_chain_utils {
+module ZionBridge::zion_cross_chain_utils {
 
-    use Bridge::zion_utils;
+    use ZionBridge::zion_utils;
     use StarcoinFramework::BCS;
     use StarcoinFramework::Hash;
     use StarcoinFramework::Option;

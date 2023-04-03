@@ -1,5 +1,5 @@
-module Bridge::zion_lock_proxy_script {
-    use Bridge::zion_lock_proxy;
+module ZionBridge::zion_lock_proxy_script {
+    use ZionBridge::zion_lock_proxy;
     use StarcoinFramework::Event;
     use StarcoinFramework::TypeInfo::TypeInfo;
     use StarcoinFramework::Token;
@@ -52,7 +52,7 @@ module Bridge::zion_lock_proxy_script {
     ) acquires LockWithFeeConfig {
         let fund = Account::withdraw<CoinType>(&account, amount);
         zion_lock_proxy::lock<CoinType>(&account, fund, toChainId, &toAddress);
-        let config_ref = borrow_global_mut<LockWithFeeConfig>(@Bridge);
+        let config_ref = borrow_global_mut<LockWithFeeConfig>(@ZionBridge);
 
         // ///////// lock STC fee here ///////////
         let stc_token = Account::withdraw<STC::STC>(&account, fee_amount);
@@ -97,7 +97,7 @@ module Bridge::zion_lock_proxy_script {
 
     public entry fun setFeeConfig(owner: signer, billing_account: address) acquires LockWithFeeConfig {
         let owner_addr = Signer::address_of(&owner);
-        assert!(Signer::address_of(&owner) == @Bridge, Errors::requires_capability(ERROR_NO_PRIVILEGE));
+        assert!(Signer::address_of(&owner) == @ZionBridge, Errors::requires_capability(ERROR_NO_PRIVILEGE));
         if (!exists<LockWithFeeConfig>(owner_addr)) {
             move_to<LockWithFeeConfig>(&owner, LockWithFeeConfig {
                 billing_account,

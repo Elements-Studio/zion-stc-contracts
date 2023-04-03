@@ -1,4 +1,4 @@
-module Bridge::zion_utils {
+module ZionBridge::zion_utils {
 
     use StarcoinFramework::Vector;
     use StarcoinFramework::FromBCS;

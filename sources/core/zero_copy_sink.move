@@ -1,4 +1,4 @@
-module Bridge::zero_copy_sink {
+module ZionBridge::zero_copy_sink {
     use StarcoinFramework::Vector;
     use StarcoinFramework::BCS;
 
@@ -47,7 +47,7 @@ module Bridge::zero_copy_sink {
 
 
     #[test_only]
-    use Bridge::zero_copy_source as source;
+    use ZionBridge::zero_copy_source as source;
 
     #[test]
     fun sink_test() {

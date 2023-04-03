@@ -1,8 +1,8 @@
-module Bridge::zion_upgrade_script {
+module ZionBridge::zion_upgrade_script {
 
-    use Bridge::SafeMath;
-    use Bridge::zion_cross_chain_manager;
-    use Bridge::zion_lock_proxy;
+    use ZionBridge::SafeMath;
+    use ZionBridge::zion_cross_chain_manager;
+    use ZionBridge::zion_lock_proxy;
 
     use StarcoinFramework::BCS;
     use StarcoinFramework::STC::STC;
@@ -10,7 +10,7 @@ module Bridge::zion_upgrade_script {
     use StarcoinFramework::TypeInfo;
     use StarcoinFramework::STC;
 
-    fun migration_from_old_treasury() {
+    public fun migration_from_old_treasury<TokenT: store>(Token::Token<T>) {
         // TODO(Bob Ong):
     }
 
@@ -18,7 +18,7 @@ module Bridge::zion_upgrade_script {
         // Treasury
         zion_cross_chain_manager::init(&admin, raw_header, starcoin_poly_id);
 
-        let license = zion_cross_chain_manager::issueLicense(&admin, @Bridge, b"zion_lock_proxy");
+        let license = zion_cross_chain_manager::issueLicense(&admin, @ZionBridge, b"zion_lock_proxy");
         let license_id = zion_cross_chain_manager::getLicenseId(&license);
         zion_lock_proxy::init(&admin);
         zion_lock_proxy::initTreasury<STC>(&admin);
@@ -35,8 +35,5 @@ module Bridge::zion_upgrade_script {
 
         // TODO(Bob Ong): Bind XUSDT asset
         // TODO(Bob Ong): Bind XETH asset
-
-        // Fee
-        migration_from_old_treasury();
     }
 }

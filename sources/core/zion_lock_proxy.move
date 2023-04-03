@@ -1,9 +1,9 @@
-module Bridge::zion_lock_proxy {
-    use Bridge::SafeMath;
-    use Bridge::zero_copy_sink;
-    use Bridge::zero_copy_source;
-    use Bridge::zion_cross_chain_manager::{Self, License};
-    use Bridge::zion_utils;
+module ZionBridge::zion_lock_proxy {
+    use ZionBridge::SafeMath;
+    use ZionBridge::zero_copy_sink;
+    use ZionBridge::zero_copy_source;
+    use ZionBridge::zion_cross_chain_manager::{Self, License};
+    use ZionBridge::zion_utils;
 
     use StarcoinFramework::Account;
     use StarcoinFramework::BCS;
@@ -90,7 +90,7 @@ module Bridge::zion_lock_proxy {
     // init
     public fun init(admin: &signer) {
         let admin_addr = Signer::address_of(admin);
-        assert!(admin_addr == @Bridge, EINVALID_SIGNER);
+        assert!(admin_addr == @ZionBridge, EINVALID_SIGNER);
         assert!(!exists<LockProxyStore>(admin_addr), EALREADY_INIT);
 
         move_to<LockProxyStore>(admin, LockProxyStore {
@@ -109,8 +109,8 @@ module Bridge::zion_lock_proxy {
 
     // create license store
     public fun create_license_store<>(admin: &signer) {
-        assert!(Signer::address_of(admin) == @Bridge, EINVALID_SIGNER);
-        assert!(!exists<LicenseStore<License>>(@Bridge), ELICENSE_STORE_ALREADY_EXIST);
+        assert!(Signer::address_of(admin) == @ZionBridge, EINVALID_SIGNER);
+        assert!(!exists<LicenseStore<License>>(@ZionBridge), ELICENSE_STORE_ALREADY_EXIST);
 
         move_to<LicenseStore<License>>(admin, LicenseStore<License> {
             license: Option::none<License>(),
@@ -119,7 +119,7 @@ module Bridge::zion_lock_proxy {
 
     // getter function
     public fun getTargetProxy(to_chain_id: u64): vector<u8> acquires LockProxyStore {
-        let config_ref = borrow_global<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global<LockProxyStore>(@ZionBridge);
         if (Table::contains(&config_ref.proxy_map, copy to_chain_id)) {
             return *Table::borrow(&config_ref.proxy_map, copy to_chain_id)
         } else {
@@ -128,7 +128,7 @@ module Bridge::zion_lock_proxy {
     }
 
     public fun getToAsset<CoinType>(to_chain_id: u64): (vector<u8>, u8) acquires LockProxyStore {
-        let config_ref = borrow_global<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global<LockProxyStore>(@ZionBridge);
         let from_asset = TypeInfo::type_of<Token::Token<CoinType>>();
 
         if (Table::contains(&config_ref.asset_map, copy from_asset)) {
@@ -147,43 +147,43 @@ module Bridge::zion_lock_proxy {
     }
 
     public fun paused(): bool acquires LockProxyStore {
-        let config_ref = borrow_global<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global<LockProxyStore>(@ZionBridge);
         return config_ref.paused
     }
 
     public fun owner(): address acquires LockProxyStore {
-        let config_ref = borrow_global<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global<LockProxyStore>(@ZionBridge);
         return config_ref.owner
     }
 
     public fun getBalance<CoinType: store>(): u128 acquires Treasury {
-        assert!(exists<Treasury<CoinType>>(@Bridge), ETREASURY_NOT_EXIST);
-        let treasury_ref = borrow_global<Treasury<CoinType>>(@Bridge);
+        assert!(exists<Treasury<CoinType>>(@ZionBridge), ETREASURY_NOT_EXIST);
+        let treasury_ref = borrow_global<Treasury<CoinType>>(@ZionBridge);
         Token::value<CoinType>(&treasury_ref.coin)
     }
 
 
     // owner function
     fun onlyOwner(owner: &signer) acquires LockProxyStore {
-        let config_ref = borrow_global<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global<LockProxyStore>(@ZionBridge);
         assert!(Signer::address_of(owner) == config_ref.owner, ENOT_OWNER);
     }
 
     public /*entry*/ fun transferOwnerShip(owner: &signer, new_owner: address) acquires LockProxyStore {
         onlyOwner(owner);
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         config_ref.owner = new_owner;
     }
 
     public /*entry*/ fun pause(owner: &signer) acquires LockProxyStore {
         onlyOwner(owner);
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         config_ref.paused = true;
     }
 
     public /*entry*/ fun unpause(owner: &signer) acquires LockProxyStore {
         onlyOwner(owner);
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         config_ref.paused = false;
     }
 
@@ -193,7 +193,7 @@ module Bridge::zion_lock_proxy {
         target_proxy_hash: vector<u8>
     ) acquires LockProxyStore {
         onlyOwner(owner);
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         Table::upsert(&mut config_ref.proxy_map, to_chain_id, copy target_proxy_hash);
 
         Event::emit_event(
@@ -207,7 +207,7 @@ module Bridge::zion_lock_proxy {
 
     public /*entry*/ fun unbindProxy(owner: &signer, to_chain_id: u64) acquires LockProxyStore {
         onlyOwner(owner);
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         if (Table::contains(&config_ref.proxy_map, copy to_chain_id)) {
             Table::remove(&mut config_ref.proxy_map, copy to_chain_id);
         } else {
@@ -231,7 +231,7 @@ module Bridge::zion_lock_proxy {
     ) acquires LockProxyStore {
         onlyOwner(owner);
         let from_asset = TypeInfo::type_of<Token::Token<CoinType>>();
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         let decimals_concat_to_asset = Vector::singleton(to_asset_decimals);
         Vector::append(&mut decimals_concat_to_asset, copy to_asset_hash);
         if (Table::contains(&config_ref.asset_map, copy from_asset)) {
@@ -260,7 +260,7 @@ module Bridge::zion_lock_proxy {
     public /*entry*/ fun unbindAsset<CoinType>(owner: &signer, to_chain_id: u64) acquires LockProxyStore {
         onlyOwner(owner);
         let from_asset = TypeInfo::type_of<Token::Token<CoinType>>();
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         if (Table::contains(&config_ref.asset_map, copy from_asset)) {
             let sub_table =
                 Table::borrow_mut(&mut config_ref.asset_map, copy from_asset);
@@ -287,53 +287,53 @@ module Bridge::zion_lock_proxy {
 
     // treasury function
     public /*entry*/ fun initTreasury<CoinType: store>(admin: &signer) {
-        assert!(Signer::address_of(admin) == @Bridge, EINVALID_SIGNER);
-        assert!(!exists<Treasury<CoinType>>(@Bridge), ETREASURY_ALREADY_EXIST);
+        assert!(Signer::address_of(admin) == @ZionBridge, EINVALID_SIGNER);
+        assert!(!exists<Treasury<CoinType>>(@ZionBridge), ETREASURY_ALREADY_EXIST);
         move_to(admin, Treasury<CoinType> {
             coin: Token::zero<CoinType>()
         });
     }
 
     public fun is_treasury_initialzed<CoinType>(): bool {
-        exists<Treasury<CoinType>>(@Bridge)
+        exists<Treasury<CoinType>>(@ZionBridge)
     }
 
     public fun is_admin(account: address): bool {
-        account == @Bridge
+        account == @ZionBridge
     }
 
     public fun deposit<CoinType: store>(fund: Token::Token<CoinType>) acquires Treasury {
-        assert!(exists<Treasury<CoinType>>(@Bridge), ETREASURY_NOT_EXIST);
-        let treasury_ref = borrow_global_mut<Treasury<CoinType>>(@Bridge);
+        assert!(exists<Treasury<CoinType>>(@ZionBridge), ETREASURY_NOT_EXIST);
+        let treasury_ref = borrow_global_mut<Treasury<CoinType>>(@ZionBridge);
         Token::deposit<CoinType>(&mut treasury_ref.coin, fund);
     }
 
     fun withdraw<CoinType: store>(amount: u64): Token::Token<CoinType> acquires Treasury {
-        assert!(exists<Treasury<CoinType>>(@Bridge), ETREASURY_NOT_EXIST);
-        let treasury_ref = borrow_global_mut<Treasury<CoinType>>(@Bridge);
+        assert!(exists<Treasury<CoinType>>(@ZionBridge), ETREASURY_NOT_EXIST);
+        let treasury_ref = borrow_global_mut<Treasury<CoinType>>(@ZionBridge);
         return Token::withdraw<CoinType>(&mut treasury_ref.coin, (amount as u128))
     }
 
 
     // license function
     public fun receiveLicense<LicenseType: store>(license: LicenseType) acquires LicenseStore {
-        assert!(exists<LicenseStore<LicenseType>>(@Bridge), ELICENSE_STORE_NOT_EXIST);
-        let license_opt = &mut borrow_global_mut<LicenseStore<LicenseType>>(@Bridge).license;
+        assert!(exists<LicenseStore<LicenseType>>(@ZionBridge), ELICENSE_STORE_NOT_EXIST);
+        let license_opt = &mut borrow_global_mut<LicenseStore<LicenseType>>(@ZionBridge).license;
         assert!(Option::is_none<LicenseType>(license_opt), ELICENSE_ALREADY_EXIST);
         Option::fill(license_opt, license);
     }
 
     public fun removeLicense<LicenseType: store>(admin: &signer): LicenseType acquires LicenseStore {
-        assert!(Signer::address_of(admin) == @Bridge, EINVALID_SIGNER);
-        assert!(exists<LicenseStore<LicenseType>>(@Bridge), ELICENSE_NOT_EXIST);
-        let license_opt = &mut borrow_global_mut<LicenseStore<LicenseType>>(@Bridge).license;
+        assert!(Signer::address_of(admin) == @ZionBridge, EINVALID_SIGNER);
+        assert!(exists<LicenseStore<LicenseType>>(@ZionBridge), ELICENSE_NOT_EXIST);
+        let license_opt = &mut borrow_global_mut<LicenseStore<LicenseType>>(@ZionBridge).license;
         assert!(Option::is_some<LicenseType>(license_opt), ELICENSE_NOT_EXIST);
         Option::extract<LicenseType>(license_opt)
     }
 
     public fun getLicenseId(): vector<u8> acquires LicenseStore {
-        assert!(exists<LicenseStore<License>>(@Bridge), ELICENSE_NOT_EXIST);
-        let license_opt = &borrow_global<LicenseStore<License>>(@Bridge).license;
+        assert!(exists<LicenseStore<License>>(@ZionBridge), ELICENSE_NOT_EXIST);
+        let license_opt = &borrow_global<LicenseStore<License>>(@ZionBridge).license;
         assert!(Option::is_some<License>(license_opt), ELICENSE_NOT_EXIST);
         return zion_cross_chain_manager::getLicenseId(Option::borrow(license_opt))
     }
@@ -350,8 +350,8 @@ module Bridge::zion_lock_proxy {
         deposit(fund);
 
         // borrow license
-        assert!(exists<LicenseStore<License>>(@Bridge), ELICENSE_NOT_EXIST);
-        let license_opt = &borrow_global<LicenseStore<License>>(@Bridge).license;
+        assert!(exists<LicenseStore<License>>(@ZionBridge), ELICENSE_NOT_EXIST);
+        let license_opt = &borrow_global<LicenseStore<License>>(@ZionBridge).license;
         assert!(Option::is_some<License>(license_opt), ELICENSE_NOT_EXIST);
         let license_ref = Option::borrow(license_opt);
 
@@ -372,7 +372,7 @@ module Bridge::zion_lock_proxy {
         zion_cross_chain_manager::crossChain(account, license_ref, toChainId, &to_proxy, &b"unlock", &tx_data);
 
         // emit Event 
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         Event::emit_event(
             &mut config_ref.lock_event,
             LockEvent {
@@ -423,7 +423,7 @@ module Bridge::zion_lock_proxy {
         Account::deposit(BCS::to_address(copy to_address), fund);
 
         // emit Event
-        let config_ref = borrow_global_mut<LockProxyStore>(@Bridge);
+        let config_ref = borrow_global_mut<LockProxyStore>(@ZionBridge);
         Event::emit_event(
             &mut config_ref.unlock_event,
             UnlockEvent {
@@ -444,8 +444,8 @@ module Bridge::zion_lock_proxy {
         raw_cross_tx: vector<u8>
     ) acquires Treasury, LicenseStore, LockProxyStore {
         // borrow license
-        assert!(exists<LicenseStore<License>>(@Bridge), ELICENSE_NOT_EXIST);
-        let license_opt = &borrow_global<LicenseStore<License>>(@Bridge).license;
+        assert!(exists<LicenseStore<License>>(@ZionBridge), ELICENSE_NOT_EXIST);
+        let license_opt = &borrow_global<LicenseStore<License>>(@ZionBridge).license;
         assert!(Option::is_some<zion_cross_chain_manager::License>(license_opt), ELICENSE_NOT_EXIST);
         let license_ref = Option::borrow(license_opt);
 
@@ -494,7 +494,7 @@ module Bridge::zion_lock_proxy {
     //#[test_only] use StarcoinFramework::Debug;
     #[test_only]
     fun test_init(admin: &signer) {
-        assert!(Signer::address_of(admin) == @Bridge, EINVALID_SIGNER);
+        assert!(Signer::address_of(admin) == @ZionBridge, EINVALID_SIGNER);
 
         move_to<LockProxyStore>(admin, LockProxyStore{
             proxy_map: Table::new<u64, vector<u8>>(),
@@ -514,11 +514,11 @@ module Bridge::zion_lock_proxy {
 
     #[test_only] 
     fun test_setup(arg: &signer) {
-        Account::create_account_with_address<STC>(@Bridge);
+        Account::create_account_with_address<STC>(@ZionBridge);
         test_init(arg);
     }
 
-    #[test(arg = @Bridge)]
+    #[test(arg = @ZionBridge)]
     fun pause_test(arg: signer) acquires LockProxyStore {
         test_setup(&arg);
         assert!(!paused(), 0);
@@ -528,7 +528,7 @@ module Bridge::zion_lock_proxy {
         assert!(!paused(), 0);
     }
 
-    #[test(arg = @Bridge, invalid_signer = @0x2), expected_failure]
+    #[test(arg = @ZionBridge, invalid_signer = @0x2), expected_failure]
     fun pause_failure_test(arg: signer, invalid_signer: signer) acquires LockProxyStore {
         test_setup(&arg);
         let addr = Signer::address_of(&invalid_signer);
@@ -549,13 +549,13 @@ module Bridge::zion_lock_proxy {
         assert!(amount == amount_cp, 0);
     }
 
-    #[test(arg = @Bridge), expected_failure(abort_code = ETARGET_ASSET_NOT_BIND)]
+    #[test(arg = @ZionBridge), expected_failure(abort_code = ETARGET_ASSET_NOT_BIND)]
     fun bind_asset_nil_failure_test(arg: signer) acquires LockProxyStore {
         test_setup(&arg);
         getToAsset<STC>(10);
     }
 
-    #[test(arg = @Bridge)]
+    #[test(arg = @ZionBridge)]
     fun bind_asset_test(arg: signer) acquires LockProxyStore {
         test_setup(&arg);
         let targetAsset = x"03233e3c0e6b48010873b947bddc4721b1bdff9648";
@@ -573,7 +573,7 @@ module Bridge::zion_lock_proxy {
         assert!(decimals == 9, 1005);
     }
 
-    #[test(arg = @Bridge), expected_failure(abort_code = ETARGET_ASSET_NOT_BIND)]
+    #[test(arg = @ZionBridge), expected_failure(abort_code = ETARGET_ASSET_NOT_BIND)]
     fun unbind_asset_test(arg: signer) acquires LockProxyStore {
         test_setup(&arg);
         let targetAsset = x"03233e3c0e6b48010873b947bddc4721b1bdff9648";
@@ -585,20 +585,20 @@ module Bridge::zion_lock_proxy {
         getToAsset<STC>(10);
     }
 
-    #[test(arg = @Bridge, invalid_signer = @0x2), expected_failure]
+    #[test(arg = @ZionBridge, invalid_signer = @0x2), expected_failure]
     fun bind_asset_failure_test(arg: signer, invalid_signer: signer) acquires LockProxyStore {
         test_setup(&arg);
         let targetAsset = x"03233e3c0e6b48010873b947bddc4721b1bdff9648";
         bindAsset<STC>(&invalid_signer, 10, targetAsset, 9);
     }
 
-    #[test(arg = @Bridge), expected_failure(abort_code = ETARGET_PROXY_NOT_BIND)]
+    #[test(arg = @ZionBridge), expected_failure(abort_code = ETARGET_PROXY_NOT_BIND)]
     fun bind_proxy_nil_failure_test(arg: signer) acquires LockProxyStore {
         test_setup(&arg);
         getTargetProxy(10);
     }
 
-    #[test(arg = @Bridge)]
+    #[test(arg = @ZionBridge)]
     fun bind_proxy_test(arg: signer) acquires LockProxyStore {
         test_setup(&arg);
         let targetProxy = x"03233e3c0e6b48010873b947bddc4721b1bdff9648";
@@ -606,7 +606,7 @@ module Bridge::zion_lock_proxy {
         assert!((getTargetProxy(10) == targetProxy), 0);
     }
 
-    #[test(arg = @Bridge), expected_failure(abort_code = ETARGET_PROXY_NOT_BIND)]
+    #[test(arg = @ZionBridge), expected_failure(abort_code = ETARGET_PROXY_NOT_BIND)]
     fun unbind_proxy_test(arg: signer) acquires LockProxyStore {
         test_setup(&arg);
         let targetProxy = x"03233e3c0e6b48010873b947bddc4721b1bdff9648";
@@ -616,7 +616,7 @@ module Bridge::zion_lock_proxy {
         getTargetProxy(10);
     }
 
-    #[test(arg = @Bridge, invalid_signer = @0x2), expected_failure]
+    #[test(arg = @ZionBridge, invalid_signer = @0x2), expected_failure]
     fun bind_proxy_failure_test(arg: signer, invalid_signer: signer) acquires LockProxyStore {
         test_setup(&arg);
         let targetProxy = x"03233e3c0e6b48010873b947bddc4721b1bdff9648";
