@@ -5,7 +5,6 @@ version = "2.0.1"
 [addresses]
 StarcoinFramework = "0x1"
 ZionBridge = "0xf8ea2d94b8a7d83ace33bb56731268e0"
-PolyBridge = "0xe52552637c5897a2d499fbf08216f73e"
 
 [dependencies]
 # v1.12.9
