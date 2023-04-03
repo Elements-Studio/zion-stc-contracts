@@ -1,18 +1,12 @@
 module ZionBridge::zion_upgrade_script {
+    use StarcoinFramework::BCS;
+    use StarcoinFramework::STC::{Self, STC};
+    use StarcoinFramework::Token;
+    use StarcoinFramework::TypeInfo;
 
     use ZionBridge::SafeMath;
     use ZionBridge::zion_cross_chain_manager;
     use ZionBridge::zion_lock_proxy;
-
-    use StarcoinFramework::BCS;
-    use StarcoinFramework::STC::STC;
-    use StarcoinFramework::Token;
-    use StarcoinFramework::TypeInfo;
-    use StarcoinFramework::STC;
-
-    public fun migration_from_old_treasury<TokenT: store>(Token::Token<T>) {
-        // TODO(Bob Ong):
-    }
 
     public entry fun genesis_init(admin: signer, raw_header: vector<u8>, starcoin_poly_id: u64) {
         // Treasury
@@ -34,6 +28,7 @@ module ZionBridge::zion_upgrade_script {
         );
 
         // TODO(Bob Ong): Bind XUSDT asset
+
         // TODO(Bob Ong): Bind XETH asset
     }
 }
