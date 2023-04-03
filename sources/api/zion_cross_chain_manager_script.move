@@ -22,6 +22,10 @@ module ZionBridge::zion_cross_chain_manager_script {
         zion_cross_chain_manager::setPolyId(&account, polyId);
     }
 
+    public entry fun setCrosschainHashIndex(account: signer, hashIndex: u128) {
+        zion_cross_chain_manager::setCrosschainHashIndex(&account, hashIndex);
+    }
+
     public entry fun change_epoch(
         account: signer,
         raw_header: vector<u8>,

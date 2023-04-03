@@ -9,6 +9,7 @@ module ZionBridge::zion_upgrade_script {
     use ZionBridge::zion_lock_proxy;
 
     public fun bindAssets(admin: &signer, zion_id: u64) {
+        zion_lock_proxy::initTreasury<STC>(admin);
         zion_lock_proxy::bindAsset<STC>(
             admin,
             zion_id,
@@ -16,6 +17,7 @@ module ZionBridge::zion_upgrade_script {
             SafeMath::log10(Token::scaling_factor<STC>())
         );
 
+        zion_lock_proxy::initTreasury<PolyBridge::XUSDT::XUSDT>(admin);
         zion_lock_proxy::bindAsset<PolyBridge::XUSDT::XUSDT>(
             admin,
             zion_id,
@@ -23,6 +25,7 @@ module ZionBridge::zion_upgrade_script {
             SafeMath::log10(Token::scaling_factor<PolyBridge::XUSDT::XUSDT>())
         );
 
+        zion_lock_proxy::initTreasury<PolyBridge::XETH::XETH>(admin);
         zion_lock_proxy::bindAsset<PolyBridge::XETH::XETH>(
             admin,
             zion_id,
@@ -38,7 +41,6 @@ module ZionBridge::zion_upgrade_script {
         let license = zion_cross_chain_manager::issueLicense(&admin, @ZionBridge, b"zion_lock_proxy");
         let license_id = zion_cross_chain_manager::getLicenseId(&license);
         zion_lock_proxy::init(&admin);
-        zion_lock_proxy::initTreasury<STC>(&admin);
         zion_lock_proxy::receiveLicense(license);
 
         // Bind STC

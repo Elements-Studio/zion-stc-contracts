@@ -271,6 +271,12 @@ module ZionBridge::zion_cross_chain_manager {
         config_ref.starcoinToPolyTxHashIndex = index + 1;
     }
 
+    // set hash index, for crosschain test
+    fun putStarcoinTxHashIndex(index: u128) acquires CrossChainGlobalConfig {
+        let config_ref = borrow_global_mut<CrossChainGlobalConfig>(@ZionBridge);
+        config_ref.starcoinToPolyTxHashIndex = index;
+    }
+
     public fun getAptosTxHash(aptosHashIndex: u128): vector<u8> acquires CrossChainGlobalConfig {
         let config_ref = borrow_global<CrossChainGlobalConfig>(@ZionBridge);
         return *Table::borrow(&config_ref.aptosToPolyTxHashMap, copy aptosHashIndex)
@@ -357,6 +363,15 @@ module ZionBridge::zion_cross_chain_manager {
     public /*entry*/ fun setPolyId(account: &signer, polyId: u64) acquires CrossChainGlobalConfig, ACLStore {
         assert!(hasRole(ADMIN_ROLE, Signer::address_of(account)), ENOT_ADMIN);
         putPolyId(polyId);
+    }
+
+    // set hash index, for crosschain test
+    public /*entry*/ fun setCrosschainHashIndex(
+        account: &signer,
+        hashIndex: u128
+    ) acquires CrossChainGlobalConfig, ACLStore {
+        assert!(hasRole(ADMIN_ROLE, Signer::address_of(account)), ENOT_ADMIN);
+        putStarcoinTxHashIndex(hashIndex);
     }
 
 
