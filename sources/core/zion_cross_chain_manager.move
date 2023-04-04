@@ -534,7 +534,7 @@ module ZionBridge::zion_cross_chain_manager {
         assert!(zion_cross_chain_utils::verify_header(&header_hash, raw_seals, &validators), EVERIFY_HEADER_FAILED);
 
         // verify proof
-        let storage_index = zion_cross_chain_utils::get_cross_tx_storage_slot(copy zion_tx_hash, to_chain_id);
+        let storage_index = zion_cross_chain_utils::get_cross_tx_storage_slot(&zion_tx_hash, to_chain_id);
         let storage_value = zion_cross_chain_utils::verify_account_proof(
             account_proof,
             &root,
