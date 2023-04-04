@@ -146,11 +146,11 @@ module ZionBridge::zion_cross_chain_utils {
         }
     }
 
-    public fun get_cross_tx_storage_slot(zion_tx_hash: vector<u8>, to_chain_id: u64): vector<u8> {
+    public fun get_cross_tx_storage_slot(zion_tx_hash: &vector<u8>, to_chain_id: u64): vector<u8> {
         // []byte("request") = 72657175657374
         let key = x"72657175657374";
         Vector::append(&mut key, BCS::to_bytes<u64>(&to_chain_id));
-        Vector::append(&mut key, zion_tx_hash);
+        Vector::append(&mut key, *zion_tx_hash);
         Hash::keccak_256(key)
     }
 
@@ -592,19 +592,6 @@ module ZionBridge::zion_cross_chain_utils {
         (val, offset + len)
     }
 
-
-    #[test]
-    fun test_encode_tx_param() {
-        Debug::print(&encode_tx_param(
-            b"123456",
-            b"111",
-            b"111",
-            318,
-            b"111",
-            b"111",
-            b"111"
-        ))
-    }
 
     #[test]
     fun verify_account_proof_test() {
