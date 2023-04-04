@@ -226,15 +226,14 @@ module ZionBridge::zion_cross_chain_utils {
         raw_seals: &vector<u8>,
         validators: &vector<vector<u8>>,
     ): bool {
-        let seals;
         let signers = Vector::empty<vector<u8>>();
-        (seals, _) = rlp_split(raw_seals, 0);
+        let (seals, _) = rlp_split(raw_seals, 0);
         let seal_cnt = Vector::length<u8>(&seals) / ZION_SEAL_RLP_LEN;
         let index = seal_cnt;
         let offset = 0;
+        let seal;
         while (index > 0) {
             index = index - 1;
-            let seal;
             (seal, offset) = rlp_split(&seals, offset);
             Vector::push_back(&mut signers, verify_seal(header_hash, &seal));
         };
