@@ -542,8 +542,7 @@ module ZionBridge::zion_cross_chain_utils {
         raw: &vector<u8>,
         offset: u64,
     ): (vector<u8>, u64) {
-        let size;
-        (size, offset) = rlp_read_kind(raw, offset);
+        let (size, offset) = rlp_read_kind(raw, offset);
         (zion_utils::slice(raw, offset, size), offset + size)
     }
 
