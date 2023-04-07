@@ -10,6 +10,10 @@ module ZionBridge::zion_utils {
     const EINVALID_FROM_BYTES_TO_U128: u64 = 5;
 
     public fun slice<Element: copy>(v: &vector<Element>, offset: u64, length: u64): vector<Element> {
+        let origin_len = Vector::length(v);
+        if (offset == 0 && origin_len == length) {
+            return *v
+        };
         let res = Vector::empty<Element>();
         while (length > 0) {
             length = length - 1;

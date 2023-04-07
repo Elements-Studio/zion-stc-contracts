@@ -7,7 +7,6 @@ module ZionBridge::zion_cross_chain_utils {
     use StarcoinFramework::Secp256k1;
     use StarcoinFramework::Vector;
 
-    #[test_only] use StarcoinFramework::Debug;
 
     struct Extra has copy, drop {
         epoch_end_height: u64,
@@ -138,7 +137,7 @@ module ZionBridge::zion_cross_chain_utils {
         let element_len = Vector::length(element);
         let key_len = Vector::length(key);
         if (key_len < element_len) return false;
-        if (zion_utils::slice(key, 0, element_len) == *element) {
+        if (*key == *element) {
             *key = zion_utils::slice(key, element_len, key_len - element_len);
             true
         } else {
