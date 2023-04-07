@@ -8,5 +8,5 @@ ZionBridge = "0xf8ea2d94b8a7d83ace33bb56731268e0"
 
 [dependencies]
 # v1.12.9
-StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "c101e26a45401671ae04b5571387661f0fc3656f" }
-Poly-STC-Assets = { git = "https://github.com/Elements-Studio/poly-stc-assets", rev = "e2fc2eb61e939d77381e41a3ef9cb6c23b9c55a6" }
+StarcoinFramework = { git = "https://github.com/starcoinorg/starcoin-framework.git", rev = "b0a1ca20ac963d23a85da921b049e49ba557f199" }
+Poly-STC-Assets = { git = "https://github.com/Elements-Studio/poly-stc-assets", rev = "b0a1ca20ac963d23a85da921b049e49ba557f199" }
